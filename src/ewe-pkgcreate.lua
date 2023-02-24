@@ -3,7 +3,7 @@
 --[[
 --	ewe-pkgtool: ewepkg-create
 --	This is a tool to create pacman's PKGBUILDs
---	Date:2023.02.20
+--	Date:2023.02.24
 --	By MIT License.
 --	Copyright (C) 2023 Ziyao.
 --	Need Lua5.4 or above to run
@@ -15,8 +15,8 @@ local string		= require "string"
 local confSkeleton = [==[
 # Maintainer: ${maintainer} <${maintainerEmail}>
 
-pkgname=${pkgname}
-pkgver=${pkgver}
+pkgname=${packagename}
+pkgver=${packagever}
 pkgrel=0
 pkgdesc='${pkgdesc}'
 url='${url}'
@@ -25,17 +25,46 @@ license=(${license})
 depends=(${depends})
 source=()
 sha256sums=()
+${makedepends}
 
 build () {
+	cd ${packagename}-$[pkgver}
+	${buildcode}
+}
+
+check() {
+	cd ${packagename}-${pkgver}
+	${checkcode}
 }
 
 package() {
+	cd ${packagename}-${pkgver}
+	${packagecode}
 }
 ]==];
 
+local buildSystemList = {
+	a = {
+		buildcode	= [[
+./configure --prefix=/usr
+	make]],
+		checkcode	= [[
+make check]],
+		packagecode	= [[
+make install DESTDIR=${pkgdir}]],
+		makedepends	= "",
+	    },
+	m = {
+		buildcode	= "",
+		checkcode	= "",
+		packagecode	= "",
+		makedepends	= "",
+	    },
+};
+
 local confArgList <const> = {
-	"pkgname","pkgver","url","pkgdesc","arch","license",
-	"depends",
+	"packagename","packagever","url","pkgdesc","arch","license",
+	"depends"
 };
 
 local function templateRender(tpl,arg)
@@ -67,7 +96,7 @@ argTable.maintainerEmail= argTable.maintainerEmail	or
 local pkgbuild = io.open("PKGBUILD","r");
 if pkgbuild
 then
-	io.stderr:write("PKGBUILD already exists");
+	io.stderr:write("PKGBUILD already exists\n");
 	return;
 end
 pkgbuild = io.open("PKGBUILD","w");
@@ -77,5 +106,14 @@ do
 	argTable[var] = askFor(var);
 end
 
+buildSystem = askFor([[
+Build System:
+(a) Autotools(-like)
+(m) Manually Specified]]);
+local buildCode = buildSystemList[buildSystem];
+argTable.buildcode	= buildCode.buildcode;
+argTable.checkcode	= buildCode.checkcode;
+argTable.packagecode	= buildCode.packagecode;
+argTable.makedepends	= buildCode.makedepends;
 pkgbuild:write(templateRender(confSkeleton,argTable));
 pkgbuild:close();
