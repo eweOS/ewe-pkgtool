@@ -24,23 +24,24 @@ arch=(${arch})
 license=(${license})
 depends=(${depends})
 source=()
-sha256sums=()
 ${makedepends}
 
 build () {
-	cd ${packagename}-${pkgver}
+	cd ${packagename}-$pkgver
 	${buildcode}
 }
 
 check() {
-	cd ${packagename}-${pkgver}
+	cd ${packagename}-$pkgver
 	${checkcode}
 }
 
 package() {
-	cd ${packagename}-${pkgver}
+	cd ${packagename}-$pkgver
 	${packagecode}
 }
+
+sha256sums=()
 ]==];
 
 local buildSystemList = {
