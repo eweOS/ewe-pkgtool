@@ -28,7 +28,7 @@ sha256sums=()
 ${makedepends}
 
 build () {
-	cd ${packagename}-$[pkgver}
+	cd ${packagename}-${pkgver}
 	${buildcode}
 }
 
