@@ -1,0 +1,31 @@
+# Maintainer: %{maintainer_name} <%{maintainer_email}>
+
+pkgname=%{pkgname}
+pkgver=%{pkgver}
+pkgrel=1
+pkgdesc=''
+url=''
+arch=(x86_64 aarch64 riscv64)
+license=(%{license})
+depends=(%{depends})
+source=(%{source})
+sha256sums=()
+
+build () {
+	cd ${pkgname}-$pkgver
+
+	./configure --prefix=/usr
+	make
+}
+
+check() {
+	cd ${pkgname}-$pkgver
+
+	make check
+}
+
+package() {
+	cd ${pkgname}-$pkgver
+
+	make install DESTDIR=$pkgdir
+}
