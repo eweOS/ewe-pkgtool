@@ -19,6 +19,40 @@ die() {
 	exit 1
 }
 
+do_ask_yes() {
+	local line
+
+	printf "$1? (Y/n): "
+	read line
+	if [ x$line = xn ]; then
+		exit 1
+	fi
+}
+
+do_backup() {
+	if [ -f $PWD/PKGBUILD ]; then
+		cp $PWD/PKGBUILD $PWD/.PKGBUILD.backup
+	fi
+}
+
+do_show_changes() {
+	if [ -f $PWD/.PKGBUILD.backup ]; then
+		diff .PKGBUILD.backup $PWD/PKGBUILD
+	fi
+}
+
+do_rollback() {
+	check_pkgbuild
+
+	if ! [ -f $PWD/.PKGBUILD.backup ]; then
+		die "no backup, cannot rollback"
+	fi
+
+	diff $PWD/PKGBUILD $PWD/.PKGBUILD.backup
+	do_ask_yes "Do you want to rollback"
+	mv .PKGBUILD.backup $PWD/PKGBUILD
+}
+
 check_pkgbuild() {
 	if ! [ -f $PWD/PKGBUILD ]; then
 		die "PKGBUILD does not exist"
@@ -51,7 +85,9 @@ do_substitution() {
 		die "usage: $program_path substitute VARNAME VARVALUE"
 	fi
 
+	do_backup
 	substitute $1 $2
+	do_show_changes
 }
 
 template_dir=$data_dir/templates
@@ -104,8 +140,12 @@ do_gensource() {
 		die 'url does not contain $pkgver' ;;
 	esac
 
+	do_backup
+
 	local src=${1//$pkgver/'$pkgver'}
 	substitute "source" "$src"
+
+	do_show_changes
 }
 
 help() {
@@ -130,6 +170,8 @@ case $opt in
 		do_substitution "$@" ;;
 	gensource)
 		do_gensource "$@" ;;
+	rollback)
+		do_rollback ;;
 	*)
 		help ;;
 esac
