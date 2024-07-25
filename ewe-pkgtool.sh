@@ -65,11 +65,18 @@ is_not_set() {
 	return $?
 }
 
+# $1: original text
+# $2: replaced text
+plain_substitute() {
+	local quoted1=$(printf '%s' "$1" | sed 's/[/#\]/\\\0/g')
+	local quoted2=$(printf '%s' "$2" | sed 's/[/#\]/\\\0/g')
+	sed -i -e "s/${quoted1}/${quoted2}/g" PKGBUILD
+}
+
 # $1: varname
 # $2: varvalue
 substitute() {
-	local quoted=$(printf '%s' "$2" | sed 's/[/#\]/\\\0/g')
-	sed -i -e "s/%{$1}/${quoted}/g" PKGBUILD
+	plain_substitute "%{$1}" "$2"
 }
 
 source_pkgbuild() {
@@ -148,6 +155,27 @@ do_gensource() {
 	do_show_changes
 }
 
+do_genchecksum() {
+	check_pkgbuild
+	source_pkgbuild
+
+	if is_not_set "source"; then
+		die "source is not set"
+	fi
+
+
+	local checksum=$(makepkg -g)
+	if [ x$checksum = x ]; then
+		die "cannot generate checksum"
+	fi
+
+	do_backup
+
+	plain_substitute 'sha256sums=()' "$checksum"
+
+	do_show_changes
+}
+
 help() {
 	echo "Usage:"
 	echo "$program_path OPERATION [ARG1] [ARG2] ..."
@@ -170,6 +198,8 @@ case $opt in
 		do_substitution "$@" ;;
 	gensource)
 		do_gensource "$@" ;;
+	genchecksum)
+		do_genchecksum "$@" ;;
 	rollback)
 		do_rollback ;;
 	*)
