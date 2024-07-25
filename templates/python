@@ -8,10 +8,10 @@ pkgdesc=''
 url=''
 arch=(any)
 license=(%{license})
-depends=(%{depends})
+depends=(python %{depends})
 makedepends=(python-build python-installer python-setuptools python-wheel)
 checkdepends=(python-pytest)
-source=(%{source})
+source=("%{source}")
 sha256sums=()
 
 build () {

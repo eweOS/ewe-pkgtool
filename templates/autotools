@@ -8,7 +8,7 @@ url=''
 arch=(x86_64 aarch64 riscv64)
 license=(%{license})
 depends=(%{depends})
-source=(%{source})
+source=("%{source}")
 sha256sums=()
 
 build () {

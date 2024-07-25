@@ -16,7 +16,7 @@ do_showconf() {
 
 die() {
 	echo $1 1>&2
-	exit -1
+	exit 1
 }
 
 check_pkgbuild() {
@@ -26,9 +26,22 @@ check_pkgbuild() {
 }
 
 # $1: varname
+is_not_set() {
+	grep -q "%{$1}" $PWD/PKGBUILD
+	return $?
+}
+
+# $1: varname
 # $2: varvalue
 substitute() {
-	sed -i -e "s/%{$1}/$2/g" PKGBUILD
+	local quoted=$(printf '%s' "$2" | sed 's/[/#\]/\\\0/g')
+	sed -i -e "s/%{$1}/${quoted}/g" PKGBUILD
+}
+
+source_pkgbuild() {
+	if ! source $PWD/PKGBUILD; then
+	die "failed to source PKGBUILD"
+	fi
 }
 
 do_substitution() {
@@ -70,6 +83,31 @@ do_template() {
 	substitute maintainer_email "$email"
 }
 
+# $1: user specified download link
+do_gensource() {
+	check_pkgbuild
+
+	if is_not_set "pkgver"; then
+		die "pkgver is not set"
+	fi
+
+	if ! is_not_set "source"; then
+		die "source has been already set"
+	fi
+
+	source_pkgbuild
+
+	case $1 in
+	*$pkgver*)
+		;;
+	*)
+		die 'url does not contain $pkgver' ;;
+	esac
+
+	local src=${1//$pkgver/'$pkgver'}
+	substitute "source" "$src"
+}
+
 help() {
 	echo "Usage:"
 	echo "$program_path OPERATION [ARG1] [ARG2] ..."
@@ -77,7 +115,7 @@ help() {
 	echo "OPERATION:"
 	echo "	showconf:	show ewe-pkgtool configuration"
 	echo "	template:	initialize a PKGBUILD template"
-	echo "	setvar:		substitute a variable in PKGBUILD"
+	echo "	set:		substitute a variable in PKGBUILD"
 }
 
 opt=$1
@@ -87,9 +125,11 @@ case $opt in
 	showconf)
 		do_showconf ;;
 	template)
-		do_template $@ ;;
-	setvar)
-		do_substitution $@ ;;
+		do_template "$@" ;;
+	set)
+		do_substitution "$@" ;;
+	gensource)
+		do_gensource "$@" ;;
 	*)
 		help ;;
 esac
