@@ -176,6 +176,14 @@ do_genchecksum() {
 	do_show_changes
 }
 
+do_listunset() {
+	check_pkgbuild
+
+	if ! grep -E '%\{\w+\}' $PWD/PKGBUILD; then
+		echo "NO UNSET VARIABLES :)"
+	fi
+}
+
 help() {
 	echo "Usage:"
 	echo "$program_path OPERATION [ARG1] [ARG2] ..."
@@ -184,6 +192,10 @@ help() {
 	echo "	showconf:	show ewe-pkgtool configuration"
 	echo "	template:	initialize a PKGBUILD template"
 	echo "	set:		substitute a variable in PKGBUILD"
+	echo "	gensource:	generate source array"
+	echo "	genchecksum:	generate checksum array"
+	echo "	rollback:	revert last changes"
+	echo "	listunset	list unset template variables in PKGBUILD"
 }
 
 opt=$1
@@ -202,6 +214,8 @@ case $opt in
 		do_genchecksum "$@" ;;
 	rollback)
 		do_rollback ;;
+	listunset)
+		do_listunset ;;
 	*)
 		help ;;
 esac
