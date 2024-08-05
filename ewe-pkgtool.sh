@@ -1,8 +1,9 @@
 #!/bin/bash
+# shellcheck disable=SC2016,SC2155
 
 program_path=$0
-script_dir="$(dirname $program_path)"
-if [ -d ${script_dir}/../share/ewe-pkgtool ]; then
+script_dir=$(dirname "$program_path")
+if [ -d "${script_dir}"/../share/ewe-pkgtool ]; then
 	data_dir=${script_dir}/../share/ewe-pkgtool/
 else
 	data_dir=$script_dir
@@ -15,53 +16,53 @@ do_showconf() {
 }
 
 die() {
-	echo $1 1>&2
+	echo "$1" 1>&2
 	exit 1
 }
 
 do_ask_yes() {
 	local line
 
-	printf "$1? (Y/n): "
-	read line
-	if [ x$line = xn ]; then
+	printf "%s? (Y/n): " "$1"
+	read -r line
+	if [ "$line" = n ]; then
 		exit 1
 	fi
 }
 
 do_backup() {
-	if [ -f $PWD/PKGBUILD ]; then
-		cp $PWD/PKGBUILD $PWD/.PKGBUILD.backup
+	if [ -f "$PWD"/PKGBUILD ]; then
+		cp "$PWD"/PKGBUILD "$PWD"/.PKGBUILD.backup
 	fi
 }
 
 do_show_changes() {
-	if [ -f $PWD/.PKGBUILD.backup ]; then
-		diff .PKGBUILD.backup $PWD/PKGBUILD
+	if [ -f "$PWD"/.PKGBUILD.backup ]; then
+		diff .PKGBUILD.backup "$PWD"/PKGBUILD
 	fi
 }
 
 do_rollback() {
 	check_pkgbuild
 
-	if ! [ -f $PWD/.PKGBUILD.backup ]; then
+	if ! [ -f "$PWD"/.PKGBUILD.backup ]; then
 		die "no backup, cannot rollback"
 	fi
 
-	diff $PWD/PKGBUILD $PWD/.PKGBUILD.backup
+	diff "$PWD"/PKGBUILD "$PWD"/.PKGBUILD.backup
 	do_ask_yes "Do you want to rollback"
-	mv .PKGBUILD.backup $PWD/PKGBUILD
+	mv .PKGBUILD.backup "$PWD"/PKGBUILD
 }
 
 check_pkgbuild() {
-	if ! [ -f $PWD/PKGBUILD ]; then
+	if ! [ -f "$PWD"/PKGBUILD ]; then
 		die "PKGBUILD does not exist"
 	fi
 }
 
 # $1: varname
 is_not_set() {
-	grep -q "%{$1}" $PWD/PKGBUILD
+	grep -q "%{$1}" "$PWD"/PKGBUILD
 	return $?
 }
 
@@ -80,20 +81,21 @@ substitute() {
 }
 
 source_pkgbuild() {
-	if ! source $PWD/PKGBUILD; then
-	die "failed to source PKGBUILD"
+	# shellcheck disable=SC1091
+	if ! source "$PWD"/PKGBUILD; then
+		die "failed to source PKGBUILD"
 	fi
 }
 
 do_substitution() {
 	check_pkgbuild
 
-	if [[ (x$1 = x) || (x$2 = x) ]]; then
+	if [[ ! "$1" || ! "$2" ]]; then
 		die "usage: $program_path substitute VARNAME VARVALUE"
 	fi
 
 	do_backup
-	substitute $1 $2
+	substitute "$1" "$2"
 	do_show_changes
 }
 
@@ -102,25 +104,25 @@ template_dir=$data_dir/templates
 do_template() {
 	local tpl=$1
 
-	if [ x$tpl = x ]; then
+	if [ "$tpl" ]; then
 		die "usage: $program_path template TEMPLATE_NAME"
 	fi
 
-	if ! [ -f $template_dir/$tpl ]; then
+	if ! [ -f "$template_dir/$tpl" ]; then
 		die "template $tpl does not exist"
 	fi
 
-	if [ -f $PWD/PKGBUILD ]; then
+	if [ -f "$PWD"/PKGBUILD ]; then
 		die "PKGBUILD already exists"
 	fi
 
 	local name="$(git config user.name)"
 	local email="$(git config user.email)"
-	if [[ (x$name = x) || (x$email = x) ]]; then
+	if [[ ! "$name" || ! "$email" ]]; then
 		die "user.name or user.email is not set for git"
 	fi
 
-	install -Dm644 $template_dir/$tpl $PWD/PKGBUILD
+	install -Dm644 "$template_dir/$tpl" "$PWD"/PKGBUILD
 
 	substitute maintainer_name "$name"
 	substitute maintainer_email "$email"
@@ -140,6 +142,7 @@ do_gensource() {
 
 	source_pkgbuild
 
+	# shellcheck disable=SC2154
 	case $1 in
 	*$pkgver*)
 		;;
@@ -165,7 +168,7 @@ do_genchecksum() {
 
 
 	local checksum=$(makepkg -g)
-	if [ x$checksum = x ]; then
+	if ! [ "$checksum" ]; then
 		die "cannot generate checksum"
 	fi
 
@@ -179,7 +182,7 @@ do_genchecksum() {
 do_listunset() {
 	check_pkgbuild
 
-	if ! grep -E '%\{\w+\}' $PWD/PKGBUILD; then
+	if ! grep -E '%\{\w+\}' "$PWD"/PKGBUILD; then
 		echo "NO UNSET VARIABLES :)"
 	fi
 }
