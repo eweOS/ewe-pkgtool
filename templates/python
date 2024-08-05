@@ -15,16 +15,16 @@ source=("%{source}")
 sha256sums=()
 
 build () {
-	cd $_pyname-$pkgver
+	cd "$_pyname-$pkgver"
 	python -m build --wheel --no-isolation
 }
 
 check() {
-	cd $_pyname-$pkgver
+	cd "$_pyname-$pkgver"
 	pytest -v
 }
 
 package() {
-	cd $_pyname-$pkgver
-	python -m installer --destdir $pkgdir dist/*.whl
+	cd "$_pyname-$pkgver"
+	python -m installer --destdir "$pkgdir" dist/*.whl
 }

@@ -12,20 +12,20 @@ source=("%{source}")
 sha256sums=()
 
 build () {
-	cd ${pkgname}-$pkgver
+	cd "$pkgname-$pkgver"
 
 	./configure --prefix=/usr
 	make
 }
 
 check() {
-	cd ${pkgname}-$pkgver
+	cd "$pkgname-$pkgver"
 
 	make check
 }
 
 package() {
-	cd ${pkgname}-$pkgver
+	cd "$pkgname-$pkgver"
 
-	make install DESTDIR=$pkgdir
+	make install DESTDIR="$pkgdir"
 }
