@@ -3,8 +3,8 @@
 pkgname=%{pkgname}
 pkgver=%{pkgver}
 pkgrel=1
-pkgdesc=''
-url=''
+pkgdesc='%{pkgdesc}'
+url='%{url}'
 arch=(x86_64 aarch64 riscv64)
 license=(%{license})
 depends=(%{depends})
