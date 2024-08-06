@@ -187,6 +187,48 @@ do_listunset() {
 	fi
 }
 
+do_trypr() {
+	local arg=$1
+	local url
+
+	check_pkgbuild
+
+	[ -d "$PWD"/trypr ] && die "Another trypr is in progress"
+
+	# Assume it is a Pull Request No.
+	if [[ "$arg" =~ ^[0-9]+$ ]]; then
+		url="https://github.com/eweOS/packages/pull/$arg.patch"
+	elif [[ "$arg" == https://github.com/eweOS/packages/pull/* ]]; then
+		url=$arg.patch
+	else
+		die "Unknown Pull Request $arg"
+	fi
+
+	local name=$(basename "$url")
+	curl -L "$url" -o "$name" || die "failed to fetch patch"
+
+	if ! git am "$name"; then
+		git am --abort
+		die "failed to apply the patch"
+	fi
+
+	mkdir -p "$PWD"/trypr || die "Cannot create working directory"
+
+	mv "$name" trypr
+	cp "$PWD"/* trypr
+	cd trypr || die "Cannot enter working directory"
+
+	if makepkg -s; then
+		echo ===========================================================
+		echo build success
+		echo ===========================================================
+	else
+		echo ===========================================================
+		echo build failure
+		echo ===========================================================
+	fi
+}
+
 help() {
 	echo "Usage:"
 	echo "$program_path OPERATION [ARG1] [ARG2] ..."
@@ -199,6 +241,7 @@ help() {
 	echo "	genchecksum:	generate checksum array"
 	echo "	rollback:	revert last changes"
 	echo "	listunset	list unset template variables in PKGBUILD"
+	echo "	trypr		test build of a Pull Request"
 }
 
 opt=$1
@@ -219,6 +262,8 @@ case $opt in
 		do_rollback ;;
 	listunset)
 		do_listunset ;;
+	trypr)
+		do_trypr "$@" ;;
 	*)
 		help ;;
 esac
