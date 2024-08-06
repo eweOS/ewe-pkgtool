@@ -104,17 +104,11 @@ template_dir=$data_dir/templates
 do_template() {
 	local tpl=$1
 
-	if [ "$tpl" ]; then
-		die "usage: $program_path template TEMPLATE_NAME"
-	fi
+	[ "$tpl" ] || die "usage: $program_path template TEMPLATE_NAME"
 
-	if ! [ -f "$template_dir/$tpl" ]; then
-		die "template $tpl does not exist"
-	fi
+	[ -f "$template_dir/$tpl" ] || die "template $tpl does not exist"
 
-	if [ -f "$PWD"/PKGBUILD ]; then
-		die "PKGBUILD already exists"
-	fi
+	[ -f "$PWD"/PKGBUILD ] && die "PKGBUILD already exists"
 
 	local name="$(git config user.name)"
 	local email="$(git config user.email)"
