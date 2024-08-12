@@ -223,6 +223,18 @@ do_trypr() {
 	fi
 }
 
+do_get() {
+	check_pkgbuild
+	source_pkgbuild
+
+	[ "$1" ] || die "var name is needed"
+
+	local v=$(declare -p "$1" | sed -e 's/declare[ a-zA-Z-]*=//')
+	[ "$v" ] || die "$1: not set"
+
+	echo "$v"
+}
+
 help() {
 	echo "Usage:"
 	echo "$program_path OPERATION [ARG1] [ARG2] ..."
@@ -231,6 +243,7 @@ help() {
 	echo "	showconf:	show ewe-pkgtool configuration"
 	echo "	template:	initialize a PKGBUILD template"
 	echo "	set:		substitute a variable in PKGBUILD"
+	echo "	get:		get a PKGBUILD variable"
 	echo "	gensource:	generate source array"
 	echo "	genchecksum:	generate checksum array"
 	echo "	rollback:	revert last changes"
@@ -248,6 +261,8 @@ case $opt in
 		do_template "$@" ;;
 	set)
 		do_substitution "$@" ;;
+	get)
+		do_get "$@" ;;
 	gensource)
 		do_gensource "$@" ;;
 	genchecksum)
