@@ -201,7 +201,7 @@ do_trypr() {
 	local name=$(basename "$url")
 	curl -L "$url" -o "$name" || die "failed to fetch patch"
 
-	if ! git am "$name"; then
+	if ! git am --keep-non-patch "$name"; then
 		git am --abort
 		die "failed to apply the patch"
 	fi
