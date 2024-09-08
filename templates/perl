@@ -1,0 +1,32 @@
+# Maintainer: %{maintainer_name} <%{maintainer_email}>
+
+pkgname=%{pkgname}
+_perlname=%{perlname}
+pkgver=%{pkgver}
+pkgrel=1
+pkgdesc='%{pkgdesc}'
+url='%{url}'
+arch=(any)
+license=(GPL PerlArtistic)
+depends=(perl %{depends})
+source=("%{source}")
+sha256sums=()
+
+build () {
+	cd "$_perlname-$pkgver"
+	perl Makefile.PL INSTALLDIRS=vendor
+	make
+}
+
+check() {
+	cd "$_perlname-$pkgver"
+	make test
+}
+
+package() {
+	cd "$_perlname-$pkgver"
+	make install DESTDIR="$pkgdir"
+
+	find "$pkgdir" -name '.packlist' -delete
+	find "$pkgdir" -name '*.pod' -delete
+}
