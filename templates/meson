@@ -1,0 +1,26 @@
+# Maintainer: %{maintainer_name} <%{maintainer_email}>
+
+pkgname=%{pkgname}
+pkgver=%{pkgver}
+pkgrel=1
+pkgdesc='%{pkgdesc}'
+url='%{url}'
+arch=(x86_64 aarch64 riscv64)
+license=(%{license})
+depends=(%{depends})
+makedepends=(meson ninja)
+source=("%{source}")
+sha256sums=()
+
+build () {
+	ewe-meson "$pkgname-$pkgver" build
+	meson compile -C build
+}
+
+check() {
+	meson test -C build
+}
+
+package() {
+	meson install -C build --destdir="$pkgdir"
+}
