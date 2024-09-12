@@ -1,4 +1,10 @@
+v0.2.2
+
+- SPDX-license-identifier is used for perl template
+
 ---
 v0.2.1
 
 - Avoid stripping "[PKGNAME]" from commit message with `trypr`
+- meson template
+- perl template
