@@ -152,27 +152,6 @@ do_gensource() {
 	do_show_changes
 }
 
-do_genchecksum() {
-	check_pkgbuild
-	source_pkgbuild
-
-	if is_not_set "source"; then
-		die "source is not set"
-	fi
-
-
-	local checksum=$(makepkg -g)
-	if ! [ "$checksum" ]; then
-		die "cannot generate checksum"
-	fi
-
-	do_backup
-
-	plain_substitute 'sha256sums=()' "$checksum"
-
-	do_show_changes
-}
-
 do_listunset() {
 	check_pkgbuild
 
@@ -245,7 +224,6 @@ help() {
 	echo "	set:		substitute a variable in PKGBUILD"
 	echo "	get:		get a PKGBUILD variable"
 	echo "	gensource:	generate source array"
-	echo "	genchecksum:	generate checksum array"
 	echo "	rollback:	revert last changes"
 	echo "	listunset	list unset template variables in PKGBUILD"
 	echo "	trypr		test build of a Pull Request"
@@ -265,8 +243,6 @@ case $opt in
 		do_get "$@" ;;
 	gensource)
 		do_gensource "$@" ;;
-	genchecksum)
-		do_genchecksum "$@" ;;
 	rollback)
 		do_rollback ;;
 	listunset)
