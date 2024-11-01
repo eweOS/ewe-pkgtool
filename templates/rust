@@ -1,0 +1,33 @@
+# Maintainer: %{maintainer_name} <%{maintainer_email}>
+
+pkgname=%{pkgname}
+pkgver=%{pkgver}
+pkgrel=1
+pkgdesc='%{pkgdesc}'
+url='%{url}'
+arch=(x86_64 aarch64 riscv64)
+license=(%{license})
+depends=(%{depends})
+makedepends=(rust)
+source=("%{source}")
+sha256sums=()
+
+prepare() {
+	cd "$pkgname-$pkgver"
+	cargo fetch --locked --target "$RUSTHOST"
+}
+
+build() {
+	cd "$pkgname-$pkgver"
+	cargo build --frozen --release --all-features
+}
+
+check() {
+	cd "$pkgname-$pkgver"
+	cargo test --frozen --release --all-features
+}
+
+package() {
+	cd "$pkgname-$pkgver"
+	install -Dm755 "target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
+}
