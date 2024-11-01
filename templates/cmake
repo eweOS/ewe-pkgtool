@@ -12,7 +12,7 @@ makedepends=(cmake)
 source=("%{source}")
 sha256sums=()
 
-build () {
+build() {
 	cmake -S "$pkgname-$pkgver" -B build \
 		-DCMAKE_BUILD_TYPE=RelWithDebInfo	\
 		-DCMAKE_INSTALL_PREFIX=/usr

@@ -12,7 +12,7 @@ depends=(perl %{depends})
 source=("%{source}")
 sha256sums=()
 
-build () {
+build() {
 	cd "$_perlname-$pkgver"
 	perl Makefile.PL INSTALLDIRS=vendor
 	make

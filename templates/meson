@@ -12,7 +12,7 @@ makedepends=(meson ninja)
 source=("%{source}")
 sha256sums=()
 
-build () {
+build() {
 	ewe-meson "$pkgname-$pkgver" build
 	meson compile -C build
 }
