@@ -1,3 +1,11 @@
+v0.3.0
+
+- Drop genchecksum subcommand
+- Add Rust template
+- Misc template format fixes
+- loongarch64 is added to arch array of architecture-specific templates
+
+---
 v0.2.2
 
 - SPDX-license-identifier is used for perl template
